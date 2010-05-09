@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">MMSReq</string>
+<string name="b_request">Request</string>
+<string name="not_available">Mobile connection is not available.</string>
+<string name="failed_to_connect">Failed to connect.</string>
+<string name="error_from_server">Server Error.</string>
+<string name="request_successed">Request successed.</string>
+<string name="start_request">Requesting...</string>
+<string name="description_label">Try to turn off WiFi if failed.</string>
+</resources>
