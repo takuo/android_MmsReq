@@ -46,16 +46,19 @@ import android.os.AsyncTask;
 import android.app.ProgressDialog;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.*;
 
 public class MMSReq extends Activity {
     private static final String LOG_TAG = "MMSReq";
 
-    private static final String MMS_PROXY_HOST = "smileweb.softbank.ne.jp";
-    private static final int    MMS_PROXY_PORT = 8080;
-    private static final String MMS_URL        = "http://mail/cgi-ntif/mweb_ntif_res.cgi?jpn=1";
-    private static final String USER_AGENT     = "smailhelp";
+    private static final String SMILE_PROXY = "smileweb.softbank.ne.jp";
+    private static final String SBMMS_PROXY = "sbwapproxy.softbank.ne.jp";
+    private static final int    PROXY_PORT  = 8080;
+    private static final String REQUEST_URL = "http://mail/cgi-ntif/mweb_ntif_res.cgi?jpn=1";
+    private static final String SMILE_USER_AGENT = "smailhelp";
+    private static final String SBMMS_USER_AGENT = "SoftBank/1.0/708SC/SCJ001 Browser/NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1";
+    private static final String SBMMS_USER = "softbank";
+    private static final String SBMMS_PASS = "qceffknarlurqgb";
 
     private static final int APN_ALREADY_ACTIVE     = 0;
     private static final int APN_REQUEST_STARTED    = 1;
@@ -64,11 +67,13 @@ public class MMSReq extends Activity {
 
     private static ProgressDialog mProgressDialog;
     private static TextView mTextResult;
+    private static Spinner mSpinnerMMSType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        mSpinnerMMSType = (Spinner) findViewById(R.id.spinner_type);
         mTextResult = (TextView) findViewById(R.id.t_result);
         Button b = (Button) findViewById(R.id.b_request);
         ClickListener listener =  new ClickListener();
@@ -78,12 +83,27 @@ public class MMSReq extends Activity {
     class ClickListener implements OnClickListener {
         public void onClick(View v) {
             AsyncRequest req = new AsyncRequest();
+            switch (mSpinnerMMSType.getSelectedItemPosition()) {
+            case 0: // smile.world
+                req.setProxy(SMILE_PROXY, null, null);
+                req.setUserAgent(SMILE_USER_AGENT);
+                break;
+            case 1: // sbmms
+                req.setProxy(SBMMS_PROXY, SBMMS_USER, SBMMS_PASS);
+                req.setUserAgent(SBMMS_USER_AGENT);
+                break;
+            default:
+              }
             req.execute();
         }
     }
 
     // Background Task class
     class AsyncRequest extends AsyncTask<Void, String, String> {
+        private String mProxyHost = null;
+        private String mProxyUser = null;
+        private String mProxyPass = null;
+        private String mUserAgent = null;
 
         public AsyncRequest() {
              mProgressDialog = new ProgressDialog(MMSReq.this);
@@ -93,6 +113,16 @@ public class MMSReq extends Activity {
         @Override
         protected String doInBackground(Void... params) {
             return requestMMS();
+        }
+
+        public void setProxy(String host, String user, String pass) {
+            mProxyHost = host;
+            mProxyUser = user;
+            mProxyPass = pass;
+        }
+
+        public void setUserAgent(String agent) {
+            mUserAgent = agent;
         }
 
         protected void onPostExecute(String result) {
@@ -136,9 +166,9 @@ public class MMSReq extends Activity {
         }
 
         protected void ensureRoute(ConnectivityManager ConnMgr) throws IOException {
-            int addr = lookupHost(MMS_PROXY_HOST);
+            int addr = lookupHost(mProxyHost);
             if (addr == -1) {
-               throw new IOException("Cannot resolve host: " + MMS_PROXY_HOST);
+               throw new IOException("Cannot resolve host: " + mProxyHost);
             } else {
                 // FIXME: should be ConnectivityManager.TYPE_MOBILE_MMS
                 if (!ConnMgr.requestRouteToHost(2, addr) )
@@ -147,11 +177,11 @@ public class MMSReq extends Activity {
         }
 
         protected HttpResponse requestHttp() throws ClientProtocolException, IOException{
-            HttpGet reqGet = new HttpGet(MMS_URL);
+            HttpGet reqGet = new HttpGet(REQUEST_URL);
             HttpClient client = new DefaultHttpClient();
             HttpParams params = client.getParams();
-            ConnRouteParams.setDefaultProxy(params, new HttpHost(MMS_PROXY_HOST, MMS_PROXY_PORT));
-            HttpProtocolParams.setUserAgent(params, USER_AGENT);
+            ConnRouteParams.setDefaultProxy(params, new HttpHost(mProxyHost, PROXY_PORT));
+            HttpProtocolParams.setUserAgent(params, mUserAgent);
             reqGet.setParams(params);
             return (HttpResponse) client.execute(reqGet);
         }
