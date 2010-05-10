@@ -24,15 +24,18 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.util.Log;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.util.EntityUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
@@ -41,6 +44,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import android.os.AsyncTask;
 import android.app.ProgressDialog;
@@ -134,7 +139,7 @@ public class MMSReq extends Activity {
                 mProgressDialog = null;
               }
             DateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
-            mTextResult.setText(result + ": " + df.format(new Date()));
+            mTextResult.setText(result + "\n" + df.format(new Date()));
         }
 
         protected void onPreExecute() {
@@ -176,11 +181,16 @@ public class MMSReq extends Activity {
             }
         }
 
-        protected HttpResponse requestHttp() throws ClientProtocolException, IOException{
+        protected HttpResponse requestHttp() throws ClientProtocolException, IOException {
             HttpGet reqGet = new HttpGet(REQUEST_URL);
-            HttpClient client = new DefaultHttpClient();
+            DefaultHttpClient client = new DefaultHttpClient();
             HttpParams params = client.getParams();
             ConnRouteParams.setDefaultProxy(params, new HttpHost(mProxyHost, PROXY_PORT));
+            if (mProxyUser != null && mProxyPass != null) {
+                client.getCredentialsProvider().setCredentials(
+                    new AuthScope(mProxyHost, PROXY_PORT),
+                    new UsernamePasswordCredentials(mProxyUser, mProxyPass));
+             }
             HttpProtocolParams.setUserAgent(params, mUserAgent);
             reqGet.setParams(params);
             return (HttpResponse) client.execute(reqGet);
@@ -222,7 +232,12 @@ public class MMSReq extends Activity {
                 } else {
                     message = getString(R.string.request_successed);
                     Log.d(LOG_TAG, "HTTP Response: 200, " + status.getReasonPhrase());
-                  }
+                    String body = EntityUtils.toString(res.getEntity());
+                    Matcher m = Pattern.compile("未読メッセージはありません。|\\d+件の受信通知の再送を受け付けました。").matcher(body);
+                    if (m.find()) {
+                           message = m.group();
+                    }
+                }
             } catch (Exception e) {
                 if (message == null)
                     message = getString(R.string.failed_to_connect);
