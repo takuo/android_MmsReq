@@ -7,6 +7,9 @@
 <string name="failed_to_connect">接続に失敗しました</string>
 <string name="error_from_server">サーバーエラー</string>
 <string name="request_successed">問い合わせが成功しました</string>
-<string name="start_request">問い合わせ中...</string>
+<string name="start_request">問い合わせ中</string>
 <string name="description_label">失敗するときはWiFiをOFFにしてみてください</string>
+<string name="connect_to_server">サーバへ接続中...</string>
+<string name="connect_to_mobile">モバイルネットワークへ接続中...</string>
+<string name="request_to_server">サーバに問い合わせ中...</string>
 </resources>

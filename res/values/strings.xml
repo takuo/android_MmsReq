@@ -7,6 +7,9 @@
 <string name="failed_to_connect">Failed to connect.</string>
 <string name="error_from_server">Server Error.</string>
 <string name="request_successed">Request successed.</string>
-<string name="start_request">Requesting...</string>
+<string name="start_request">Requesting</string>
 <string name="description_label">Try to turn off WiFi if failed.</string>
+<string name="connect_to_server">Connecting to server...</string>
+<string name="connect_to_mobile">Connecting to Mobile Network...</string>
+<string name="request_to_server">Requesting to server...</string>
 </resources>
