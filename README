@@ -1,7 +1,7 @@
 MMS新着受信アプリ for Android.
 
 * Softbank Mobile MMS 専用です
-* smile.world (iPhone用APN)以外では使えません
+* smile.world (iPhone用APN)以外のAPNでは動作未確認です
 
 ライセンス
   Licensed under the Apache License, Version 2.0 (the "License");
