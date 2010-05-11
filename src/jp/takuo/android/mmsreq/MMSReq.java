@@ -112,24 +112,6 @@ public class MMSReq extends Activity {
         });
     }
 
-    class ClickListener implements OnClickListener {
-        public void onClick(View v) {
-            AsyncRequest req = new AsyncRequest();
-            switch (mSpinnerMMSType.getSelectedItemPosition()) {
-            case 0: // smile.world
-                req.setProxy(SMILE_PROXY, null, null);
-                req.setUserAgent(SMILE_USER_AGENT);
-                break;
-            case 1: // sbmms
-                req.setProxy(SBMMS_PROXY, SBMMS_USER, SBMMS_PASS);
-                req.setUserAgent(SBMMS_USER_AGENT);
-                break;
-            default:
-              }
-            req.execute();
-        }
-    }
-
     // Background Task class
     class AsyncRequest extends AsyncTask<Void, String, String> {
         private String mProxyHost = null;
@@ -262,7 +244,7 @@ public class MMSReq extends Activity {
                     String body = EntityUtils.toString(res.getEntity());
                     Matcher m = Pattern.compile("未読メッセージはありません。|\\d+件の受信通知の再送を受け付けました。").matcher(body);
                     if (m.find()) {
-                           message = m.group();
+                        message = m.group();
                     }
                 }
             } catch (Exception e) {
