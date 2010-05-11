@@ -50,7 +50,6 @@ import android.app.ProgressDialog;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
-import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MMSReq extends Activity {
     private static final String LOG_TAG = "MMSReq";
@@ -83,7 +82,6 @@ public class MMSReq extends Activity {
         mTextResult = (TextView) findViewById(R.id.t_result);
         Button b = (Button) findViewById(R.id.b_request);
         b.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 AsyncRequest req = new AsyncRequest();
                 switch (mSpinnerMMSType.getSelectedItemPosition()) {
@@ -103,15 +101,13 @@ public class MMSReq extends Activity {
         mSpinnerMMSType.setSelection(PreferenceManager
                                      .getDefaultSharedPreferences(getApplicationContext())
                                      .getInt(PREFS_MMS_TYPE, 0));
-        mSpinnerMMSType.setOnItemSelectedListener(new OnItemSelectedListener() {
-             @Override
+        mSpinnerMMSType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                Spinner spinner = (Spinner) parent;
                int val = (int)spinner.getSelectedItemPosition();
                PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
                                 .edit().putInt(PREFS_MMS_TYPE, val).commit();
               }
-             @Override
              public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
