@@ -1,9 +1,13 @@
+-- 0.3
+ * リファクタリング
+ * 問い合わせ結果を表示
+ * sbmms に対応してみた(未検証)
 
--- 0.2 2010-05-10
+-- 0.2  2010-05-10
  * 署名パッケージ (0.1をuninstallしないとinstallできません)
   * adb uninstall jp.takuo.android.mmsreq
   * adb install android_MmsReq-0.2.apk
  * 問い合わせ中の進捗表示ダイアログを若干変更
 
--- 0.1 2010-05-10
+-- 0.1  2010-05-10
  * Initial release.
