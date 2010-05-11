@@ -62,7 +62,7 @@ public class MMSReq extends Activity {
     private static final String SMILE_USER_AGENT = "smailhelp";
     private static final String SBMMS_USER_AGENT = "SoftBank/1.0/708SC/SCJ001 Browser/NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1";
     private static final String SBMMS_USER = "softbank";
-    private static final String SBMMS_PASS = "qceffknarlurqgb";
+    private static final String SBMMS_PASS = "qceffknarlurqgbl";
 
     private static final int APN_ALREADY_ACTIVE     = 0;
     private static final int APN_REQUEST_STARTED    = 1;
