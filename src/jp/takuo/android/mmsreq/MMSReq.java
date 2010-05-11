@@ -18,11 +18,10 @@ package jp.takuo.android.mmsreq;
 
 import android.app.Activity;
 import android.os.Bundle;
-
 import android.content.Context;
-
 import android.net.ConnectivityManager;
 import android.util.Log;
+import android.preference.PreferenceManager;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -51,6 +50,7 @@ import android.app.ProgressDialog;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MMSReq extends Activity {
     private static final String LOG_TAG = "MMSReq";
@@ -69,6 +69,8 @@ public class MMSReq extends Activity {
     // private static final int APN_TYPE_NOT_AVAILABLE = 2;
     // private static final int APN_REQUEST_FAILED     = 3;
 
+    private static final String PREFS_MMS_TYPE = "mms_type";
+
     private static ProgressDialog mProgressDialog;
     private static TextView mTextResult;
     private static Spinner mSpinnerMMSType;
@@ -80,8 +82,38 @@ public class MMSReq extends Activity {
         mSpinnerMMSType = (Spinner) findViewById(R.id.spinner_type);
         mTextResult = (TextView) findViewById(R.id.t_result);
         Button b = (Button) findViewById(R.id.b_request);
-        ClickListener listener =  new ClickListener();
-        b.setOnClickListener(listener);
+        b.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AsyncRequest req = new AsyncRequest();
+                switch (mSpinnerMMSType.getSelectedItemPosition()) {
+                case 0: // smile.world
+                    req.setProxy(SMILE_PROXY, null, null);
+                    req.setUserAgent(SMILE_USER_AGENT);
+                    break;
+                case 1: // sbmms
+                    req.setProxy(SBMMS_PROXY, SBMMS_USER, SBMMS_PASS);
+                    req.setUserAgent(SBMMS_USER_AGENT);
+                    break;
+                default:
+                  }
+                req.execute();
+            }
+         });
+        mSpinnerMMSType.setSelection(PreferenceManager
+                                     .getDefaultSharedPreferences(getApplicationContext())
+                                     .getInt(PREFS_MMS_TYPE, 0));
+        mSpinnerMMSType.setOnItemSelectedListener(new OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+               Spinner spinner = (Spinner) parent;
+               int val = (int)spinner.getSelectedItemPosition();
+               PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                                .edit().putInt(PREFS_MMS_TYPE, val).commit();
+              }
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     class ClickListener implements OnClickListener {
