@@ -12,7 +12,7 @@ Tips
  * 銀SIMでの運用(sbmms)
    - APN設定をdefaultとmmsの二つ用意するとよいようです。
      - APN: open.softbank.ne.jp の APNタイプをdefault,suplにする。
-     - APN: mailwebservice.softbank.ne.jp の APNタイプをmmsにする。
+     - APN: mailwebservice.softbank.ne.jp (MMSプロキシ sbmmsproxy.softbank.ne.jp)の APNタイプをmmsにする。
 
 ライセンス
   Licensed under the Apache License, Version 2.0 (the "License");
