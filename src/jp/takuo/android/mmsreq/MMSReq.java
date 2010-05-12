@@ -54,14 +54,25 @@ import android.widget.*;
 public class MMSReq extends Activity {
     private static final String LOG_TAG = "MMSReq";
 
-    private static final String SMILE_PROXY = "smileweb.softbank.ne.jp";
-    private static final String SBMMS_PROXY = "sbwapproxy.softbank.ne.jp";
+    // common
     private static final int    PROXY_PORT  = 8080;
     private static final String REQUEST_URL = "http://mail/cgi-ntif/mweb_ntif_res.cgi?jpn=1";
+
+    // MMS Proxy server
+    private static final String SMILE_PROXY = "smileweb.softbank.ne.jp";
+    private static final String VFJP_PROXY  = "sbwapproxy.softbank.ne.jp";
+    private static final String OPEN_PROXY  = "webopen.softbank.ne.jp";
+
+    // User Agent Strings
     private static final String SMILE_USER_AGENT = "smailhelp";
-    private static final String SBMMS_USER_AGENT = "SoftBank/1.0/708SC/SCJ001 Browser/NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1";
-    private static final String SBMMS_USER = "softbank";
-    private static final String SBMMS_PASS = "qceffknarlurqgbl";
+    private static final String VFJP_USER_AGENT  = "SoftBank/1.0/708SC/SCJ001 Browser/NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1";
+    private static final String OPEN_USER_AGENT  = "SoftBank/1.0/X01NK/NKJ001";
+
+    // Authentication for Proxy
+    private static final String OPEN_USER = "opensoftbank";
+    private static final String OPEN_PASS = "ebMNuX1FIHg9d3DA";
+    private static final String VFJP_USER = "softbank";
+    private static final String VFJP_PASS = "qceffknarlurqgbl";
 
     private static final int APN_ALREADY_ACTIVE     = 0;
     private static final int APN_REQUEST_STARTED    = 1;
@@ -70,9 +81,9 @@ public class MMSReq extends Activity {
 
     private static final String PREFS_MMS_TYPE = "mms_type";
 
-    private static ProgressDialog mProgressDialog;
-    private static TextView mTextResult;
-    private static Spinner mSpinnerMMSType;
+    private ProgressDialog mProgressDialog;
+    private TextView mTextResult;
+    private Spinner mSpinnerMMSType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,9 +100,13 @@ public class MMSReq extends Activity {
                     req.setProxy(SMILE_PROXY, null, null);
                     req.setUserAgent(SMILE_USER_AGENT);
                     break;
-                case 1: // sbmms
-                    req.setProxy(SBMMS_PROXY, SBMMS_USER, SBMMS_PASS);
-                    req.setUserAgent(SBMMS_USER_AGENT);
+                case 1: // vfjp
+                    req.setProxy(VFJP_PROXY, VFJP_USER, VFJP_PASS);
+                    req.setUserAgent(VFJP_USER_AGENT);
+                    break;
+                case 2: // openmms
+                    req.setProxy(OPEN_PROXY, OPEN_USER, OPEN_PASS);
+                    req.setUserAgent(OPEN_USER_AGENT);
                     break;
                 default:
                   }
@@ -118,6 +133,7 @@ public class MMSReq extends Activity {
         private String mProxyUser = null;
         private String mProxyPass = null;
         private String mUserAgent = null;
+        private String mRequestUrl = REQUEST_URL;
 
         public AsyncRequest() {
              mProgressDialog = new ProgressDialog(MMSReq.this);
@@ -129,16 +145,20 @@ public class MMSReq extends Activity {
             return requestMMS();
         }
 
-        public void setProxy(String host, String user, String pass) {
+        private void setProxy(String host, String user, String pass) {
             mProxyHost = host;
             mProxyUser = user;
             mProxyPass = pass;
         }
 
-        public void setUserAgent(String agent) {
+        private void setUserAgent(String agent) {
             mUserAgent = agent;
         }
-
+/* unused
+        private void setRequestUrl(String url) {
+            mRequestUrl = url;
+        }
+*/
         protected void onPostExecute(String result) {
             Log.d(LOG_TAG, "onPostExecute");
             super.onPostExecute(result);
@@ -191,17 +211,21 @@ public class MMSReq extends Activity {
         }
 
         protected HttpResponse requestHttp() throws ClientProtocolException, IOException {
-            HttpGet reqGet = new HttpGet(REQUEST_URL);
+            HttpGet reqGet = new HttpGet(mRequestUrl);
             DefaultHttpClient client = new DefaultHttpClient();
             HttpParams params = client.getParams();
+            Log.d(LOG_TAG, "Proxy: "+mProxyHost + ":" + PROXY_PORT);
             ConnRouteParams.setDefaultProxy(params, new HttpHost(mProxyHost, PROXY_PORT));
             if (mProxyUser != null && mProxyPass != null) {
+                Log.d(LOG_TAG, "ProxyAuth: '" + mProxyUser+":"+mProxyPass+"'");
                 client.getCredentialsProvider().setCredentials(
                     new AuthScope(mProxyHost, PROXY_PORT),
                     new UsernamePasswordCredentials(mProxyUser, mProxyPass));
              }
+            Log.d(LOG_TAG,"UserAgent: " + mUserAgent);
             HttpProtocolParams.setUserAgent(params, mUserAgent);
             reqGet.setParams(params);
+            Log.d(LOG_TAG, "HTTP Get: " + mRequestUrl);
             return (HttpResponse) client.execute(reqGet);
         }
 
@@ -217,6 +241,7 @@ public class MMSReq extends Activity {
                     throw new IOException("Cannot establish Network for MMS Request");
                   }
                 publishProgress(getString(R.string.connect_to_mobile));
+                int count = 0;
                 while(true) {
                     int result = beginMmsConnectivity(ConnMgr);
                     if (result != APN_ALREADY_ACTIVE) {
@@ -225,6 +250,8 @@ public class MMSReq extends Activity {
                         // Just wait for connectivity startup without
                         // any new request of APN switch.
                         Thread.sleep(1500);
+                        if(count++ > 5)
+                            throw new IOException("Cannot establish Network for MMS Request");
                     } else {
                         break;
                        }
@@ -250,6 +277,7 @@ public class MMSReq extends Activity {
             } catch (Exception e) {
                 if (message == null)
                     message = getString(R.string.failed_to_connect);
+                message = message + "\n" + e.getMessage();
                 Log.e(LOG_TAG, e.toString());
             } finally {
                 Log.d(LOG_TAG, "stopUsingNetworkFeature: MOBILE, enableMMS");
