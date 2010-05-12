@@ -5,7 +5,7 @@
 <string name="b_request">問い合せ</string>
 <string name="not_available">モバイルネットワークが利用できません</string>
 <string name="failed_to_connect">接続に失敗しました</string>
-<string name="error_from_server">サーバーエラー</string>
+<string name="error_from_server">サーバエラー</string>
 <string name="request_successed">問い合わせが成功しました</string>
 <string name="start_request">問い合わせ中</string>
 <string name="description_label">失敗するときはWiFiをOFFにしてみてください</string>
