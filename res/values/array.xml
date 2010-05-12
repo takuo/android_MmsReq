@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string-array name="mms_type"><item>smile.world</item>
-<item>vfjp</item>
-<item>open</item>
+<string-array name="mms_type"><item>smilemms</item>
+<item>sbmms</item>
+<item>mmsopen</item>
 </string-array>
 </resources>
