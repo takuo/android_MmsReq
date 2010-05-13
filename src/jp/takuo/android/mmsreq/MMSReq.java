@@ -54,6 +54,11 @@ import android.widget.*;
 public class MMSReq extends Activity {
     private static final String LOG_TAG = "MMSReq";
 
+    // APN Profiles
+    private static final int APN_PROFILE_SMILE = 0;
+    private static final int APN_PROFILE_SBMMS = 1;
+    private static final int APN_PROFILE_OPEN  = 2;
+
     // common
     private static final int    PROXY_PORT  = 8080;
     private static final String REQUEST_URL = "http://mail/cgi-ntif/mweb_ntif_res.cgi?jpn=1";
@@ -92,39 +97,41 @@ public class MMSReq extends Activity {
         mSpinnerMMSType = (Spinner) findViewById(R.id.spinner_type);
         mTextResult = (TextView) findViewById(R.id.t_result);
         Button b = (Button) findViewById(R.id.b_request);
+
         b.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                AsyncRequest req = new AsyncRequest();
+                AsyncRequest req = null;
                 switch (mSpinnerMMSType.getSelectedItemPosition()) {
-                case 0: // smile.world
-                    req.setProxy(SMILE_PROXY, null, null);
-                    req.setUserAgent(SMILE_USER_AGENT);
+                case APN_PROFILE_SMILE: // smile.world
+                    req = new AsyncRequest(SMILE_PROXY, null, null, SMILE_USER_AGENT);
                     break;
-                case 1: // vfjp
-                    req.setProxy(VFJP_PROXY, VFJP_USER, VFJP_PASS);
-                    req.setUserAgent(VFJP_USER_AGENT);
+                case APN_PROFILE_SBMMS: // vfjp
+                    req = new AsyncRequest(VFJP_PROXY, VFJP_USER, VFJP_PASS, VFJP_USER_AGENT);
                     break;
-                case 2: // openmms
-                    req.setProxy(OPEN_PROXY, OPEN_USER, OPEN_PASS);
-                    req.setUserAgent(OPEN_USER_AGENT);
+                case APN_PROFILE_OPEN: // openmms
+                    req = new AsyncRequest(OPEN_PROXY, OPEN_USER, OPEN_PASS, OPEN_USER_AGENT);
                     break;
                 default:
-                  }
-                req.execute();
+                }
+                if(req != null)
+                    req.execute();
             }
-         });
+        });
+
         mSpinnerMMSType.setSelection(PreferenceManager
                                      .getDefaultSharedPreferences(getApplicationContext())
                                      .getInt(PREFS_MMS_TYPE, 0));
         mSpinnerMMSType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-               Spinner spinner = (Spinner) parent;
-               int val = (int)spinner.getSelectedItemPosition();
-               PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
-                                .edit().putInt(PREFS_MMS_TYPE, val).commit();
-              }
-             public void onNothingSelected(AdapterView<?> parent) {}
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                Spinner spinner = (Spinner) parent;
+                int val = (int)spinner.getSelectedItemPosition();
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                                 .edit().putInt(PREFS_MMS_TYPE, val).commit();
+	    }
+
+            public void onNothingSelected(AdapterView<?> parent) { }
         });
+
     }
 
     // Background Task class
@@ -135,38 +142,28 @@ public class MMSReq extends Activity {
         private String mUserAgent = null;
         private String mRequestUrl = REQUEST_URL;
 
-        public AsyncRequest() {
-             mProgressDialog = new ProgressDialog(MMSReq.this);
-             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        }
+        public AsyncRequest(String proxy, String user, String pass, String agent) {
+            mProxyHost = proxy;
+            mProxyUser = user;
+            mProxyPass = pass;
+            mUserAgent = agent;
+            mProgressDialog = new ProgressDialog(MMSReq.this);
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+       }
 
         @Override
         protected String doInBackground(Void... params) {
             return requestMMS();
         }
 
-        private void setProxy(String host, String user, String pass) {
-            mProxyHost = host;
-            mProxyUser = user;
-            mProxyPass = pass;
-        }
-
-        private void setUserAgent(String agent) {
-            mUserAgent = agent;
-        }
-/* unused
-        private void setRequestUrl(String url) {
-            mRequestUrl = url;
-        }
-*/
         protected void onPostExecute(String result) {
             Log.d(LOG_TAG, "onPostExecute");
             super.onPostExecute(result);
             if(mProgressDialog != null &&
-                mProgressDialog.isShowing()){
+                mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
                 mProgressDialog = null;
-              }
+            }
             DateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
             mTextResult.setText(result + "\n" + df.format(new Date()));
         }
@@ -204,7 +201,7 @@ public class MMSReq extends Activity {
             if (addr == -1) {
                throw new IOException("Cannot resolve host: " + mProxyHost);
             } else {
-                // FIXME: should be ConnectivityManager.TYPE_MOBILE_MMS
+                // FIXME: 2 should be ConnectivityManager.TYPE_MOBILE_MMS
                 if (!ConnMgr.requestRouteToHost(2, addr) )
                     throw new IOException("Cannot establish route to :" + addr);
             }
@@ -230,10 +227,7 @@ public class MMSReq extends Activity {
         }
 
         protected String requestMMS() {
-            ConnectivityManager ConnMgr;
-            Context ctx;
-            ctx = getApplicationContext();
-            ConnMgr = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager ConnMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             String message = null;
             try {
                 if (!ConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isAvailable()) {
@@ -266,23 +260,24 @@ public class MMSReq extends Activity {
                     message = getString(R.string.error_from_server) + " HTTP:" + status.getStatusCode();
                     Log.e(LOG_TAG, "HTTP Response: " + status.getStatusCode() + ", " + status.getReasonPhrase());
                 } else {
-                    message = getString(R.string.request_successed);
-                    Log.d(LOG_TAG, "HTTP Response: 200, " + status.getReasonPhrase());
                     String body = EntityUtils.toString(res.getEntity());
                     Matcher m = Pattern.compile("未読メッセージはありません。|\\d+件の受信通知の再送を受け付けました。").matcher(body);
                     if (m.find()) {
                         message = m.group();
+                    } else {
+                        message = getString(R.string.request_successed);
                     }
+                    Log.d(LOG_TAG, "HTTP Response: 200, " + status.getReasonPhrase());
                 }
             } catch (Exception e) {
                 if (message == null)
                     message = getString(R.string.failed_to_connect);
                 message = message + "\n" + e.getMessage();
-                Log.e(LOG_TAG, e.toString());
+                e.printStackTrace();
             } finally {
                 Log.d(LOG_TAG, "stopUsingNetworkFeature: MOBILE, enableMMS");
                 ConnMgr.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableMMS");
-              }
+            }
             return message;
         }
     } /* AsyncRequest */
@@ -294,21 +289,21 @@ public class MMSReq extends Activity {
      * @param hostname the name of the host (or the IP address)
      * @return the IP address as an {@code int} in network byte order
      */
-     private static int lookupHost(String hostname) {
-         InetAddress inetAddress;
-         try {
-             inetAddress = InetAddress.getByName(hostname);
-         } catch (UnknownHostException e) {
-             return -1;
-         }
-         Log.d(LOG_TAG, "Resolved Address: " + inetAddress.toString());
-         byte[] addrBytes;
-         int addr;
-         addrBytes = inetAddress.getAddress();
-         addr = ((addrBytes[3] & 0xff) << 24)
+    private static int lookupHost(String hostname) {
+        InetAddress inetAddress;
+        try {
+            inetAddress = InetAddress.getByName(hostname);
+        } catch (UnknownHostException e) {
+            return -1;
+        }
+        Log.d(LOG_TAG, "Resolved Address: " + inetAddress.toString());
+        byte[] addrBytes;
+        int addr;
+        addrBytes = inetAddress.getAddress();
+        addr = ((addrBytes[3] & 0xff) << 24)
                     | ((addrBytes[2] & 0xff) << 16)
                     | ((addrBytes[1] & 0xff) << 8)
                     |  (addrBytes[0] & 0xff);
-         return addr;
+        return addr;
     }
 }
