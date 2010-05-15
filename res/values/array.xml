@@ -2,6 +2,6 @@
 <resources>
 <string-array name="mms_type"><item>smilemms</item>
 <item>sbmms</item>
-<item>mmsopen</item>
+
 </string-array>
 </resources>
