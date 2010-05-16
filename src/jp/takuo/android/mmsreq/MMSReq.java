@@ -23,8 +23,6 @@ import android.net.ConnectivityManager;
 import android.util.Log;
 import android.preference.PreferenceManager;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -71,13 +69,7 @@ public class MMSReq extends Activity {
     // User Agent Strings
     private static final String SMILE_USER_AGENT = "smailhelp";
     private static final String VFJP_USER_AGENT  = "SoftBank/1.0/708SC/SCJ001 Browser/NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1";
-    private static final String OPEN_USER_AGENT  = "SoftBank/1.0/X01NK/NKJ001";
-
-    // Authentication for Proxy
-    private static final String OPEN_USER = "opensoftbank";
-    private static final String OPEN_PASS = "ebMNuX1FIHg9d3DA";
-    private static final String VFJP_USER = "softbank";
-    private static final String VFJP_PASS = "qceffknarlurqgbl";
+    private static final String OPEN_USER_AGENT  = "Mozilla/5.0 (SymbianOS/9.2; U; Series60/3.1 NokiaN95/21.0.201 Profile/MIDP-2.0 Configuration/CLDC-1.1) AppleWebKit/413 (KHTML, like Gecko) Safari/413 Nokia/X02NK";
 
     private static final int APN_ALREADY_ACTIVE     = 0;
     private static final int APN_REQUEST_STARTED    = 1;
@@ -103,13 +95,13 @@ public class MMSReq extends Activity {
                 AsyncRequest req = null;
                 switch (mSpinnerMMSType.getSelectedItemPosition()) {
                 case APN_PROFILE_SMILE: // smile.world
-                    req = new AsyncRequest(SMILE_PROXY, null, null, SMILE_USER_AGENT);
+                    req = new AsyncRequest(SMILE_PROXY, SMILE_USER_AGENT);
                     break;
                 case APN_PROFILE_SBMMS: // vfjp
-                    req = new AsyncRequest(VFJP_PROXY, VFJP_USER, VFJP_PASS, VFJP_USER_AGENT);
+                    req = new AsyncRequest(VFJP_PROXY, VFJP_USER_AGENT);
                     break;
                 case APN_PROFILE_OPEN: // openmms
-                    req = new AsyncRequest(OPEN_PROXY, OPEN_USER, OPEN_PASS, OPEN_USER_AGENT);
+                    req = new AsyncRequest(OPEN_PROXY, OPEN_USER_AGENT);
                     break;
                 default:
                 }
@@ -137,15 +129,11 @@ public class MMSReq extends Activity {
     // Background Task class
     class AsyncRequest extends AsyncTask<Void, String, String> {
         private String mProxyHost = null;
-        private String mProxyUser = null;
-        private String mProxyPass = null;
         private String mUserAgent = null;
         private String mRequestUrl = REQUEST_URL;
 
-        public AsyncRequest(String proxy, String user, String pass, String agent) {
+        public AsyncRequest(String proxy, String agent) {
             mProxyHost = proxy;
-            mProxyUser = user;
-            mProxyPass = pass;
             mUserAgent = agent;
             mProgressDialog = new ProgressDialog(MMSReq.this);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -213,12 +201,6 @@ public class MMSReq extends Activity {
             HttpParams params = client.getParams();
             Log.d(LOG_TAG, "Proxy: "+mProxyHost + ":" + PROXY_PORT);
             ConnRouteParams.setDefaultProxy(params, new HttpHost(mProxyHost, PROXY_PORT));
-            if (mProxyUser != null && mProxyPass != null) {
-                Log.d(LOG_TAG, "ProxyAuth: '" + mProxyUser+":"+mProxyPass+"'");
-                client.getCredentialsProvider().setCredentials(
-                    new AuthScope(mProxyHost, PROXY_PORT),
-                    new UsernamePasswordCredentials(mProxyUser, mProxyPass));
-             }
             Log.d(LOG_TAG,"UserAgent: " + mUserAgent);
             HttpProtocolParams.setUserAgent(params, mUserAgent);
             reqGet.setParams(params);
