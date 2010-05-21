@@ -1,18 +1,10 @@
 MMS新着受信アプリ for Android.
 
  * Softbank Mobile MMS 専用です。
- * smile.world(smilemms) (iPhone用APN)以外のAPNでは動作未確認です。
  * NexusOneやDesire(X06HT)でMMSを使用可能にするアプリではありません。
 
-Tips
- * Android2.1でのMMS
-   - AOSP 5月5日以降のeclairでまともに使えるようになります。(CyanogenMod-5.0.7以降)
-   - CyanogenMod-5.0.6-N1では拙作のbackportパッケージがあります。 (http://takuo.jp/junk/cm-5.0.6/)
-
- * 銀SIMでの運用(sbmms)
-   - APN設定をdefaultとmmsの二つ用意するとよいようです。
-     - APN: open.softbank.ne.jp の APNタイプをdefault,suplにする。
-     - APN: mailwebservice.softbank.ne.jp (MMSプロキシ sbmmsproxy.softbank.ne.jp)の APNタイプをmmsにする。
+ウェブページ
+  http://wiki.github.com/takuo/android_MmsReq/
 
 ライセンス
   Licensed under the Apache License, Version 2.0 (the "License");
