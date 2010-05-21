@@ -189,8 +189,7 @@ public class MMSReq extends Activity {
             if (addr == -1) {
                throw new IOException("Cannot resolve host: " + mProxyHost);
             } else {
-                // FIXME: 2 should be ConnectivityManager.TYPE_MOBILE_MMS
-                if (!ConnMgr.requestRouteToHost(2, addr) )
+                if (!ConnMgr.requestRouteToHost(ConnectivityManager.TYPE_MOBILE_MMS, addr) )
                     throw new IOException("Cannot establish route to :" + addr);
             }
         }
@@ -212,7 +211,7 @@ public class MMSReq extends Activity {
             ConnectivityManager ConnMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             String message = null;
             try {
-                if (!ConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isAvailable()) {
+                if (!ConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS).isAvailable()) {
                     message = getString(R.string.not_available);
                     throw new IOException("Cannot establish Network for MMS Request");
                   }
