@@ -1,4 +1,4 @@
--- 0.5 pre
+-- 0.4.99 2010-05-22
  * mmsopen の設定でも動くようにした
  * Proxyの認証は不要ぽいので削除
  * webopenのUSER_AGENTを変更
