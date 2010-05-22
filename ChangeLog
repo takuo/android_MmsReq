@@ -1,9 +1,11 @@
--- 0.4.99 2010-05-22
+-- 0.5  2010-05-22
  * mmsopen の設定でも動くようにした
  * Proxyの認証は不要ぽいので削除
  * webopenのUSER_AGENTを変更
  * SDK Level 8でコンパイル
  * アプリケーションアイコンを追加
+ * app_name を変更(Softbank MMSReq)
+ * Android Marketにリリース
 
 -- 0.4  2010-05-15
  * エラーメッセージをちょっと追加
