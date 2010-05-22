@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="app_name">MMSReq</string>
+    <string name="app_name">Softbank MMSReq</string>
 <string name="b_request">問い合せ</string>
 <string name="not_available">モバイルネットワークが利用できません</string>
 <string name="failed_to_connect">接続に失敗しました</string>
