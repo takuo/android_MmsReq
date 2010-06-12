@@ -48,6 +48,7 @@ import android.app.ProgressDialog;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class MMSReq extends Activity {
     private static final String LOG_TAG = "MMSReq";
@@ -76,18 +77,24 @@ public class MMSReq extends Activity {
     // private static final int APN_TYPE_NOT_AVAILABLE = 2;
     // private static final int APN_REQUEST_FAILED     = 3;
 
-    private static final String PREFS_MMS_TYPE = "mms_type";
+    private static final String PREFS_MMS_TYPE  = "mms_type";
+    private static final String PREFS_AUTO_EXIT = "auto_exit";
 
     private ProgressDialog mProgressDialog;
     private TextView mTextResult;
     private Spinner mSpinnerMMSType;
+    private CheckBox mCheckAutoExit;
+
+    private boolean mResult = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final Context context = getApplicationContext();
         setContentView(R.layout.main);
         mSpinnerMMSType = (Spinner) findViewById(R.id.spinner_type);
         mTextResult = (TextView) findViewById(R.id.t_result);
+        mCheckAutoExit = (CheckBox) findViewById(R.id.check_auto_exit);
         Button b = (Button) findViewById(R.id.b_request);
 
         b.setOnClickListener(new OnClickListener() {
@@ -109,21 +116,29 @@ public class MMSReq extends Activity {
                     req.execute();
             }
         });
-
+        mCheckAutoExit.setChecked(PreferenceManager
+                                  .getDefaultSharedPreferences(context)
+                                  .getBoolean(PREFS_AUTO_EXIT, true));
+        mCheckAutoExit.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                 PreferenceManager.getDefaultSharedPreferences(context)
+                 .edit().putBoolean(PREFS_AUTO_EXIT, isChecked).commit();
+            }
+        });
         mSpinnerMMSType.setSelection(PreferenceManager
-                                     .getDefaultSharedPreferences(getApplicationContext())
+                                     .getDefaultSharedPreferences(context)
                                      .getInt(PREFS_MMS_TYPE, 0));
         mSpinnerMMSType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 Spinner spinner = (Spinner) parent;
                 int val = (int)spinner.getSelectedItemPosition();
-                PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                PreferenceManager.getDefaultSharedPreferences(context)
                                  .edit().putInt(PREFS_MMS_TYPE, val).commit();
-	    }
+            }
 
             public void onNothingSelected(AdapterView<?> parent) { }
         });
-
     }
 
     // Background Task class
@@ -145,15 +160,19 @@ public class MMSReq extends Activity {
         }
 
         protected void onPostExecute(String result) {
-            Log.d(LOG_TAG, "onPostExecute");
             super.onPostExecute(result);
             if(mProgressDialog != null &&
                 mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
                 mProgressDialog = null;
             }
-            DateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
-            mTextResult.setText(result + "\n" + df.format(new Date()));
+            if (mResult && mCheckAutoExit.isChecked()) {
+                Toast.makeText(getApplicationContext(), result, Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                DateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
+                mTextResult.setText(result + "\n" + df.format(new Date()));
+            }
         }
 
         protected void onPreExecute() {
@@ -226,7 +245,7 @@ public class MMSReq extends Activity {
                         // any new request of APN switch.
                         Thread.sleep(1500);
                         if(count++ > 5)
-                            throw new IOException("Cannot establish Network for MMS Request");
+                            throw new IOException("Cannot establish Network for MMS Request: timeout");
                     } else {
                         break;
                        }
@@ -249,6 +268,7 @@ public class MMSReq extends Activity {
                         message = getString(R.string.request_successed);
                     }
                     Log.d(LOG_TAG, "HTTP Response: 200, " + status.getReasonPhrase());
+                    mResult = true;
                 }
             } catch (Exception e) {
                 if (message == null)
