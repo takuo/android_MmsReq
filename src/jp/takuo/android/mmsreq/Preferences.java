@@ -25,7 +25,6 @@ import android.util.Log;
 import android.net.Uri;
 
 public class Preferences {
-    private static final String PREFS_MMS_TYPE  = "mms_type";
     private static final String PREFS_AUTO_REQUEST  = "auto_request";
     private static final String PREFS_AUTO_EXIT = "auto_exit";
     private static final String PREFS_ENABLE_TOAST = "enable_toast";
@@ -91,7 +90,7 @@ public class Preferences {
             } else if (apn.equalsIgnoreCase("mailwebservice.softbank.ne.jp")) {
                 Log.d(TAG, "MMS APN Detect: sbmms");
                 return Request.APN_PROFILE_SBMMS;
-            } else {
+            } else if (apn.equalsIgnoreCase("open.softbank.ne.jp")) {
                 Log.d(TAG, "MMS APN Detect: mmsopen");
                 return Request.APN_PROFILE_OPEN;
              }
@@ -100,10 +99,7 @@ public class Preferences {
     }
 
     static public int getMmsType(Context context) {
-        int type = getMmsTypeInternal(context);
-        return (type < 0) ? PreferenceManager
-    .getDefaultSharedPreferences(context)
-    .getInt(PREFS_MMS_TYPE, 0) : type;
+        return getMmsTypeInternal(context);
     }
 
     static public boolean getAutoRequest(Context context) {
@@ -122,11 +118,6 @@ public class Preferences {
         return PreferenceManager
             .getDefaultSharedPreferences(context)
             .getBoolean(PREFS_ENABLE_TOAST, true);
-    }
-
-    static public void setMmsType(Context context, int type) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-        .edit().putInt(PREFS_MMS_TYPE, type).commit();
     }
 
     static public void setAutoRequest(Context context, boolean value) {
