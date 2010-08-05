@@ -94,7 +94,7 @@ public class MMSReq extends Activity {
             mTextAPN.setText("MMS APN: open.softbank.ne.jp");
             break;
         default:
-            mTextResult.setText(getString(R.string.invalid_apn_setting));
+            mTextAPN.setText(getString(R.string.invalid_apn_setting));
             b.setEnabled(false);
         }
     }
