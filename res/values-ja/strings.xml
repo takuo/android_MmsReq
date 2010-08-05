@@ -13,4 +13,8 @@
 <string name="connect_to_mobile">モバイルネットワークへ接続中...</string>
 <string name="request_to_server">サーバに問い合わせ中...</string>
 <string name="check_auto_exit">自動終了</string>
+<string name="check_auto_request">圏外からの復帰時に自動的に問い合わせる</string>
+<string name="check_toast">結果をトーストで通知する</string>
+
+<string name="invalid_apn_setting">MMS用のAPN設定がありません。</string>
 </resources>
