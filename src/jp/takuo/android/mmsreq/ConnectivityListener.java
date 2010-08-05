@@ -38,7 +38,6 @@ public class ConnectivityListener extends BroadcastReceiver {
         ConnectivityManager connMgr =  (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         Log.d(LOG_TAG, "TYPE_MOBILE: available=" + info.isAvailable() + ", old=" + mAvailable);
-        Log.d(LOG_TAG, "TYPE_MOBILE: DetailedState=" + info.getDetailedState());
         if (info.isAvailable() != mAvailable) {
             mAvailable = info.isAvailable();
             if (!connMgr.getBackgroundDataSetting())
