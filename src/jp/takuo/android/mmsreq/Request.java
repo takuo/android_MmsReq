@@ -35,6 +35,7 @@ import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 public class Request {
@@ -82,29 +83,14 @@ public class Request {
             mUserAgent = OPEN_USER_AGENT;
             break;
         default:
-            mProxyHost = SMILE_PROXY;
-            mUserAgent = SMILE_USER_AGENT;
+            mProxyHost = null;
+            mUserAgent = null;
         }
-    }
-
-    public Request(Context context, String proxy) {
-        mContext = context;
-        if (proxy.startsWith("smile")) {
-            mProxyHost = SMILE_PROXY;
-            mUserAgent = SMILE_USER_AGENT;
-         } else if (proxy.startsWith("mmsopen")) {
-            mProxyHost = OPEN_PROXY;
-            mUserAgent = OPEN_USER_AGENT;
-         } else {
-            mProxyHost = VFJP_PROXY;
-            mUserAgent = VFJP_USER_AGENT;
-         }
     }
 
     private int beginMmsConnectivity(ConnectivityManager ConnMgr) throws NoConnectivityException {
         Log.d(LOG_TAG, "startUsingNetworkFeature: MOBILE, enableMMS");
-        int result = ConnMgr.startUsingNetworkFeature(
-        ConnectivityManager.TYPE_MOBILE, "enableMMS");
+        int result = ConnMgr.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableMMS");
 
         Log.d(LOG_TAG, "beginMmsConnectivity: result=" + result);
 
@@ -149,21 +135,17 @@ public class Request {
 
     protected void tryConnect() throws NoConnectivityException, ConnectTimeoutException, NoRouteToHostException, InterruptedException {
         int count = 0;
-        while(true) {
-            int result = beginMmsConnectivity(mConnMgr);
-            if (result != APN_ALREADY_ACTIVE) {
-                Log.d(LOG_TAG, "Extending MMS connectivity returned " +  result +
-                        " instead of APN_ALREADY_ACTIVE, waiting for ready");
-                // Just wait for connectivity startup without
-                // any new request of APN switch.
+        int result = beginMmsConnectivity(mConnMgr);
+        if (result != APN_ALREADY_ACTIVE) {
+            NetworkInfo info = mConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
+            while (!info.isConnected()) {
                 Thread.sleep(1500);
+                info = mConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS);
+                Log.d(LOG_TAG, "Waiting for CONNECTED: state=" + info.getState());
                 if(count++ > 5)
                     throw new ConnectTimeoutException(mContext.getString(R.string.failed_to_connect));
-            } else {
-                break;
-               }
-          }
-        Thread.sleep(1500);
+            }
+        }
         ensureRoute();
     }
 
@@ -193,6 +175,7 @@ public class Request {
     }
 
     public String requestMMS() {
+        if (mProxyHost == null) return null;
         String message = null;
         try {
             getConnectivity();
