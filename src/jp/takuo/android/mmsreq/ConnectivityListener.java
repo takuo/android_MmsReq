@@ -27,8 +27,8 @@ import java.util.Date;
 
 public class ConnectivityListener extends BroadcastReceiver {
     private static final String LOG_TAG = "MmsReq";
-    private static boolean mAvailable = true;
-    private static Date lastDisconnect = new Date();
+    private static boolean mAvailable = false;
+    private static Date lastDisconnect = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -50,7 +50,7 @@ public class ConnectivityListener extends BroadcastReceiver {
                 return;
             if (mAvailable) {
                 String message = null;
-                if (lastDisconnect.compareTo(new Date()) < 10 * 60) {
+                if (lastDisconnect != null && lastDisconnect.compareTo(new Date()) < 10 * 60) {
                     Log.d(LOG_TAG, "Disconnected time less than 10 minutes. do nothing.");
                     return;
                 }
