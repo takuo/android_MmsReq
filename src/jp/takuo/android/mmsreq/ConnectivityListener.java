@@ -23,18 +23,24 @@ import android.net.NetworkInfo;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.Date;
+
 public class ConnectivityListener extends BroadcastReceiver {
     private static final String LOG_TAG = "MmsReq";
     private static boolean mAvailable = true;
+    private static Date lastDisconnect = new Date();
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         boolean enableAuto = Preferences.getAutoRequest(context);
 
+        Log.d(LOG_TAG, "got CONNECTIVITY_ACTION");
+
         if(!enableAuto ||
             !action.equalsIgnoreCase(ConnectivityManager.CONNECTIVITY_ACTION))
-            return ;
+            return;
+
         ConnectivityManager connMgr =  (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         Log.d(LOG_TAG, "TYPE_MOBILE: available=" + info.isAvailable() + ", old=" + mAvailable);
@@ -44,6 +50,10 @@ public class ConnectivityListener extends BroadcastReceiver {
                 return;
             if (mAvailable) {
                 String message = null;
+                if (lastDisconnect.compareTo(new Date()) < 10 * 60) {
+                    Log.d(LOG_TAG, "Disconnected time less than 10 minutes. do nothing.");
+                    return;
+                }
                 Log.d(LOG_TAG, "Mobile Network is available, should call request.");
                 try {
                     Request req = new Request(context, Preferences.getMmsType(context));
@@ -55,6 +65,8 @@ public class ConnectivityListener extends BroadcastReceiver {
                 if (message != null && 
                     Preferences.getEnableToast(context))
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+            } else {
+                lastDisconnect = new Date();
             }
         }
     }
