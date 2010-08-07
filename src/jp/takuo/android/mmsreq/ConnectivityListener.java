@@ -26,7 +26,7 @@ import android.widget.Toast;
 import java.util.Date;
 
 public class ConnectivityListener extends BroadcastReceiver {
-    private static final String LOG_TAG = "MmsReq";
+    private static final String LOG_TAG = "MmsReqListener";
     private static boolean mAvailable = false;
     private static Date lastDisconnect = null;
 
@@ -46,8 +46,11 @@ public class ConnectivityListener extends BroadcastReceiver {
         Log.d(LOG_TAG, "TYPE_MOBILE: available=" + info.isAvailable() + ", old=" + mAvailable);
         if (info.isAvailable() != mAvailable) {
             mAvailable = info.isAvailable();
+
+            // should do nothing when background data setting is false
             if (!connMgr.getBackgroundDataSetting())
                 return;
+
             if (mAvailable) {
                 String message = null;
                 if (lastDisconnect != null && lastDisconnect.compareTo(new Date()) < 10 * 60) {
@@ -66,6 +69,7 @@ public class ConnectivityListener extends BroadcastReceiver {
                     Preferences.getEnableToast(context))
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show();
             } else {
+                // Lost mobile data connectivity
                 lastDisconnect = new Date();
             }
         }

@@ -126,14 +126,11 @@ public class Request {
         return (HttpResponse) client.execute(reqGet);
     }
 
-    protected void getConnectivity() throws NoConnectivityException {
+    protected void getConnectivity() throws NoConnectivityException, ConnectTimeoutException, InterruptedException {
         mConnMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (!mConnMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_MMS).isAvailable()) {
             throw new NoConnectivityException(mContext.getString(R.string.not_available));
           }
-    }
-
-    protected void tryConnect() throws NoConnectivityException, ConnectTimeoutException, NoRouteToHostException, InterruptedException {
         int count = 0;
         int result = beginMmsConnectivity(mConnMgr);
         if (result != APN_ALREADY_ACTIVE) {
@@ -146,6 +143,11 @@ public class Request {
                     throw new ConnectTimeoutException(mContext.getString(R.string.failed_to_connect));
             }
         }
+        Thread.sleep(1500); // wait for adding dns
+    }
+
+    // public delegation for ensureRoute()
+    protected void tryConnect() throws NoRouteToHostException {
         ensureRoute();
     }
 
@@ -208,6 +210,7 @@ public class Request {
         try {
             inetAddress = InetAddress.getByName(hostname);
         } catch (UnknownHostException e) {
+            Log.d(LOG_TAG, "Failed to resolve address: " + hostname);
             return -1;
         }
         Log.d(LOG_TAG, "Resolved Address: " + inetAddress.toString());
