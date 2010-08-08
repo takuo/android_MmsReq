@@ -35,7 +35,8 @@ public class ConnectivityListener extends BroadcastReceiver {
         String action = intent.getAction();
         boolean enableAuto = Preferences.getAutoRequest(context);
 
-        Log.d(LOG_TAG, "got CONNECTIVITY_ACTION");
+        NetworkInfo target = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+        Log.d(LOG_TAG, "got CONNECTIVITY_ACTION for " + target.getTypeName() + " at " + new Date());
 
         if(!enableAuto ||
             !action.equalsIgnoreCase(ConnectivityManager.CONNECTIVITY_ACTION))
