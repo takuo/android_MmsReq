@@ -13,18 +13,20 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ConnectivityListener">
+        <receiver android:name=".BootCompleteReceiver">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
+        <service android:name=".MmsReqService"
+            android:enabled="true" />
     </application>
-
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <uses-sdk android:minSdkVersion="6">6</uses-sdk>
 </manifest> 

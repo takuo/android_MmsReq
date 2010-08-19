@@ -18,6 +18,7 @@ package jp.takuo.android.mmsreq;
 import android.app.Activity;
 import android.os.Bundle;
 import android.content.Context;
+import android.content.Intent;
 
 import java.util.Date;
 import java.text.DateFormat;
@@ -72,6 +73,11 @@ public class MMSReq extends Activity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Preferences.setAutoRequest(mContext, isChecked);
+                if (isChecked) {
+                    startService(new Intent(mContext, MmsReqService.class));
+                } else {
+                    stopService(new Intent(mContext, MmsReqService.class));
+                }
             }
         });
         mCheckBox = (CheckBox) findViewById(R.id.check_toast);
