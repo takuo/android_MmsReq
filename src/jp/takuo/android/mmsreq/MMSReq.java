@@ -80,6 +80,8 @@ public class MMSReq extends Activity {
                 }
             }
         });
+        if (Preferences.getAutoRequest(mContext))
+            startService(new Intent(mContext, MmsReqService.class));
         mCheckBox = (CheckBox) findViewById(R.id.check_toast);
         mCheckBox.setChecked(Preferences.getEnableToast(mContext));
         mCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
