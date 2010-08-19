@@ -35,16 +35,15 @@ public class ConnectivityListener extends BroadcastReceiver {
         boolean mStatus = Preferences.getSavedStatus(context);
         Date mLastDisconn = Preferences.getSavedDisconnectedAt(context);
 
-        NetworkInfo target = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-        Log.d(LOG_TAG, "got CONNECTIVITY_ACTION for " + target.getTypeName() + " at " + new Date());
-
         if(!enableAuto ||
-            !action.equalsIgnoreCase(ConnectivityManager.CONNECTIVITY_ACTION))
-            return;
+                !action.equalsIgnoreCase(ConnectivityManager.CONNECTIVITY_ACTION))
+                return;
+
+        NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+        Log.d(LOG_TAG, "got CONNECTIVITY_ACTION for " + info.getTypeName() + " at " + new Date());
 
         ConnectivityManager connMgr =  (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        
+        info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         Log.d(LOG_TAG, "TYPE_MOBILE: available=" + info.isAvailable() + ", old=" + mStatus);
         if (info.isAvailable() != mStatus) {
             mStatus = info.isAvailable();
@@ -55,9 +54,10 @@ public class ConnectivityListener extends BroadcastReceiver {
                 return;
 
             if (mStatus) {
+                Preferences.setSavedDisconnectedAt(context, 0);
                 String message = null;
-                if (mLastDisconn != null && mLastDisconn.compareTo(new Date()) < 10 * 60) {
-                    Log.d(LOG_TAG, "Disconnected time less than 10 minutes. do nothing.");
+                if (mLastDisconn != null && mLastDisconn.compareTo(new Date()) < 5 * 60) {
+                    Log.d(LOG_TAG, "Disconnected time less than 5 minutes. do nothing.");
                     return;
                 }
                 Log.d(LOG_TAG, "Mobile Network is available, should call request.");
@@ -71,7 +71,6 @@ public class ConnectivityListener extends BroadcastReceiver {
                 if (message != null && 
                     Preferences.getEnableToast(context))
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-                Preferences.setSavedDisconnectedAt(context, 0);
             } else {
                 // Lost mobile data connectivity
                 Preferences.setSavedDisconnectedAt(context, (new Date()).getTime());
