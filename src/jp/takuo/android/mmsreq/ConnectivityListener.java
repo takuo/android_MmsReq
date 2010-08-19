@@ -27,13 +27,13 @@ import java.util.Date;
 
 public class ConnectivityListener extends BroadcastReceiver {
     private static final String LOG_TAG = "MmsReqListener";
-    private static boolean mAvailable = false;
-    private static Date lastDisconnect = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         boolean enableAuto = Preferences.getAutoRequest(context);
+        boolean mStatus = Preferences.getSavedStatus(context);
+        Date mLastDisconn = Preferences.getSavedDisconnectedAt(context);
 
         NetworkInfo target = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
         Log.d(LOG_TAG, "got CONNECTIVITY_ACTION for " + target.getTypeName() + " at " + new Date());
@@ -44,17 +44,19 @@ public class ConnectivityListener extends BroadcastReceiver {
 
         ConnectivityManager connMgr =  (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        Log.d(LOG_TAG, "TYPE_MOBILE: available=" + info.isAvailable() + ", old=" + mAvailable);
-        if (info.isAvailable() != mAvailable) {
-            mAvailable = info.isAvailable();
+        
+        Log.d(LOG_TAG, "TYPE_MOBILE: available=" + info.isAvailable() + ", old=" + mStatus);
+        if (info.isAvailable() != mStatus) {
+            mStatus = info.isAvailable();
+            Preferences.setSavedStatus(context, mStatus);
 
             // should do nothing when background data setting is false
             if (!connMgr.getBackgroundDataSetting())
                 return;
 
-            if (mAvailable) {
+            if (mStatus) {
                 String message = null;
-                if (lastDisconnect != null && lastDisconnect.compareTo(new Date()) < 10 * 60) {
+                if (mLastDisconn != null && mLastDisconn.compareTo(new Date()) < 10 * 60) {
                     Log.d(LOG_TAG, "Disconnected time less than 10 minutes. do nothing.");
                     return;
                 }
@@ -69,9 +71,10 @@ public class ConnectivityListener extends BroadcastReceiver {
                 if (message != null && 
                     Preferences.getEnableToast(context))
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                Preferences.setSavedDisconnectedAt(context, 0);
             } else {
                 // Lost mobile data connectivity
-                lastDisconnect = new Date();
+                Preferences.setSavedDisconnectedAt(context, (new Date()).getTime());
             }
         }
     }

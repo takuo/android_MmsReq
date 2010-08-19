@@ -15,6 +15,8 @@
  */
 package jp.takuo.android.mmsreq;
 
+import java.util.Date;
+
 import android.content.Context;
 import android.content.ContentResolver;
 import android.preference.PreferenceManager;
@@ -28,6 +30,9 @@ public class Preferences {
     private static final String PREFS_AUTO_REQUEST  = "auto_request";
     private static final String PREFS_AUTO_EXIT = "auto_exit";
     private static final String PREFS_ENABLE_TOAST = "enable_toast";
+
+    private static final String PREFS_SAVED_STATUS = "saved_status";
+    private static final String PREFS_SAVED_DISCONNECTED_AT = "disconnected_at";
 
     private static final String APN_TYPE_MMS = "mms";
     private static final String APN_TYPE_ALL = "*";
@@ -120,6 +125,19 @@ public class Preferences {
             .getBoolean(PREFS_ENABLE_TOAST, true);
     }
 
+    static public boolean getSavedStatus(Context context) {
+        return PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .getBoolean(PREFS_SAVED_STATUS, true);
+    }
+
+    static public Date getSavedDisconnectedAt(Context context) {
+        long time = PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .getLong(PREFS_SAVED_DISCONNECTED_AT, 0);
+        return (time == 0) ? null : new Date(time);
+    }
+
     static public void setAutoRequest(Context context, boolean value) {
         PreferenceManager.getDefaultSharedPreferences(context)
         .edit().putBoolean(PREFS_AUTO_REQUEST, value).commit();
@@ -134,4 +152,15 @@ public class Preferences {
         PreferenceManager.getDefaultSharedPreferences(context)
         .edit().putBoolean(PREFS_ENABLE_TOAST, value).commit();
     }
+
+    static public void setSavedStatus(Context context, boolean value) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+        .edit().putBoolean(PREFS_SAVED_STATUS, value).commit();
+    }
+
+    static public void setSavedDisconnectedAt(Context context, long value) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+        .edit().putLong(PREFS_SAVED_DISCONNECTED_AT, value).commit();
+    }
+
 }
