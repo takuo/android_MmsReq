@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <string name="app_name">Softbank MMSReq</string>
 <string name="b_request">問い合せ</string>
 <string name="not_available">モバイルネットワークが利用できません</string>
 <string name="failed_to_connect">接続に失敗しました</string>
@@ -14,7 +12,5 @@
 <string name="request_to_server">サーバに問い合わせ中...</string>
 <string name="check_auto_exit">自動終了</string>
 <string name="check_auto_request">圏外からの復帰時に自動的に問い合わせる</string>
-<string name="check_toast">結果をトーストで通知する</string>
-
-<string name="invalid_apn_setting">MMS用のAPN設定がありません。</string>
+<string name="label_notification_type">通知</string>
 </resources>

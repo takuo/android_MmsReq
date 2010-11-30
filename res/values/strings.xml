@@ -14,7 +14,6 @@
 <string name="request_to_server">Requesting to server...</string>
 <string name="check_auto_exit">Auto exit</string>
 <string name="check_auto_request">Auto request when connected to mobile network.</string>
-<string name="check_toast">Enable toast notification.</string>
-<string name="invalid_apn_setting">APN for MMS was not found.</string>
 <string name="label_apn_proxy">Web Proxy</string>
+<string name="label_notification_type">Notification</string>
 </resources>
