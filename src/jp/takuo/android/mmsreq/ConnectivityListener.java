@@ -15,6 +15,9 @@
  */
 package jp.takuo.android.mmsreq;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -68,9 +71,22 @@ public class ConnectivityListener extends BroadcastReceiver {
                     e.printStackTrace();
                     return;
                 }
-                if (message != null && 
-                    Preferences.getEnableToast(context))
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                if (message != null) {
+                    switch (Preferences.getNotificationType(context)) {
+                    case Preferences.NOTIFICATION_TOAST:
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                        break;
+                    case Preferences.NOTIFICATION_BAR:
+                        Intent in = new Intent(context, MMSReq.class);
+                        PendingIntent pending = PendingIntent.getActivity(context, 0, in, Intent.FLAG_ACTIVITY_NEW_TASK);
+                        Notification n = new Notification(R.drawable.icon, message, System.currentTimeMillis());
+                        n.setLatestEventInfo(context, "Softbank MmsReq", message, pending);
+                        NotificationManager nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+                        nm.notify(R.string.app_name, n);
+                        break;
+                    default:
+                    }
+                }
             } else {
                 // Lost mobile data connectivity
                 Preferences.setSavedDisconnectedAt(context, (new Date()).getTime());

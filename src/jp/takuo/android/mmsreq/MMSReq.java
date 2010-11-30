@@ -16,8 +16,12 @@
 package jp.takuo.android.mmsreq;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.os.Bundle;
 import android.content.Context;
+import android.content.Intent;
 
 import java.util.Date;
 import java.text.DateFormat;
@@ -35,12 +39,13 @@ public class MMSReq extends Activity {
     private Context mContext;
     private ProgressDialog mProgressDialog;
     private TextView mTextResult;
-    // private TextView mTextAPN;
     private CheckBox mCheckBox;
     private Spinner mSpinnerAPN;
+    private Spinner mSpinnerNotif;
 
     private Request mRequest;
     private boolean mResult = false;
+    private NotificationManager mNotifMgr;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,9 +53,11 @@ public class MMSReq extends Activity {
         mContext = getApplicationContext();
         setContentView(R.layout.main);
         mTextResult = (TextView) findViewById(R.id.t_result);
-        // mTextAPN = (TextView) findViewById(R.id.text_apn_name);
         mSpinnerAPN = (Spinner) findViewById(R.id.spinner_apn);
+        mSpinnerNotif = (Spinner) findViewById(R.id.spinner_notification);
         Button b = (Button) findViewById(R.id.b_request);
+        mNotifMgr = (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotifMgr.cancel(R.string.app_name);
 
         b.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -74,13 +81,17 @@ public class MMSReq extends Activity {
                 Preferences.setAutoRequest(mContext, isChecked);
             }
         });
-        mCheckBox = (CheckBox) findViewById(R.id.check_toast);
-        mCheckBox.setChecked(Preferences.getEnableToast(mContext));
-        mCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Preferences.setEnableToast(mContext, isChecked);
+
+        mSpinnerNotif.setSelection(Preferences.getNotificationType(mContext));
+        mSpinnerNotif.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                Spinner spinner = (Spinner) parent;
+                int val = (int)spinner.getSelectedItemPosition();
+                Preferences.setNotificationType(mContext, val);
             }
+            public void onNothingSelected(AdapterView<?> parent) { }
         });
+
         mSpinnerAPN.setSelection(Preferences.getMmsType(mContext));
         mSpinnerAPN.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -90,23 +101,6 @@ public class MMSReq extends Activity {
             }
             public void onNothingSelected(AdapterView<?> parent) { }
         });
-/*
-        int type = Preferences.getMmsType(mContext);
-        switch (type) {
-        case Request.APN_PROFILE_SMILE:
-            mTextAPN.setText("MMS APN: smile.world");
-            break;
-        case Request.APN_PROFILE_SBMMS:
-            mTextAPN.setText("MMS APN: mailwebservice.softbank.ne.jp");
-            break;
-        case Request.APN_PROFILE_OPEN:
-            mTextAPN.setText("MMS APN: open.softbank.ne.jp");
-            break;
-        default:
-            mTextAPN.setText(getString(R.string.invalid_apn_setting));
-            b.setEnabled(false);
-        }
-*/
     }
 
     // Background Task class
@@ -129,8 +123,18 @@ public class MMSReq extends Activity {
                 mProgressDialog = null;
             }
             if (mResult && Preferences.getAutoExit(mContext)) {
-                if (Preferences.getEnableToast(mContext))
+                switch (Preferences.getNotificationType(mContext)) {
+                case Preferences.NOTIFICATION_TOAST:
                     Toast.makeText(mContext, result, Toast.LENGTH_LONG).show();
+                    break;
+                case Preferences.NOTIFICATION_BAR:
+                    Intent in = new Intent(mContext, MMSReq.class);
+                    PendingIntent pending = PendingIntent.getActivity(mContext, 0, in, Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Notification n = new Notification(R.drawable.icon, result, System.currentTimeMillis());
+                    n.setLatestEventInfo(mContext, "Softbank MmsReq", result, pending);
+                    mNotifMgr.notify(R.string.app_name, n);
+                    break;
+                }
                 finish();
             } else {
                 DateFormat df = new SimpleDateFormat("MM/dd HH:mm:ss");
