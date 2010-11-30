@@ -3,6 +3,10 @@ MMS新着受信アプリ for Android.
  * Softbank Mobile MMS 専用です。
  * NexusOneやDesire(X06HT)でMMSを使用可能にするアプリではありません。
 
+既知の問題
+
+ * 複数のMMS APN設定(APN type: mms or *)がある場合, Wi-Fi接続時のMMS用データコネクションが正しく選択されないことがある
+
 ウェブページ
   http://wiki.github.com/takuo/android_MmsReq/
 
