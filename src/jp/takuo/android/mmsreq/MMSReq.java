@@ -35,8 +35,9 @@ public class MMSReq extends Activity {
     private Context mContext;
     private ProgressDialog mProgressDialog;
     private TextView mTextResult;
-    private TextView mTextAPN;
+    // private TextView mTextAPN;
     private CheckBox mCheckBox;
+    private Spinner mSpinnerAPN;
 
     private Request mRequest;
     private boolean mResult = false;
@@ -47,7 +48,8 @@ public class MMSReq extends Activity {
         mContext = getApplicationContext();
         setContentView(R.layout.main);
         mTextResult = (TextView) findViewById(R.id.t_result);
-        mTextAPN = (TextView) findViewById(R.id.text_apn_name);
+        // mTextAPN = (TextView) findViewById(R.id.text_apn_name);
+        mSpinnerAPN = (Spinner) findViewById(R.id.spinner_apn);
         Button b = (Button) findViewById(R.id.b_request);
 
         b.setOnClickListener(new OnClickListener() {
@@ -61,7 +63,6 @@ public class MMSReq extends Activity {
         mCheckBox = (CheckBox) findViewById(R.id.check_auto_exit);
         mCheckBox.setChecked(Preferences.getAutoExit(mContext));
         mCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Preferences.setAutoExit(mContext, isChecked);
             }
@@ -69,7 +70,6 @@ public class MMSReq extends Activity {
         mCheckBox = (CheckBox) findViewById(R.id.check_auto_request);
         mCheckBox.setChecked(Preferences.getAutoRequest(mContext));
         mCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Preferences.setAutoRequest(mContext, isChecked);
             }
@@ -77,11 +77,20 @@ public class MMSReq extends Activity {
         mCheckBox = (CheckBox) findViewById(R.id.check_toast);
         mCheckBox.setChecked(Preferences.getEnableToast(mContext));
         mCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Preferences.setEnableToast(mContext, isChecked);
             }
         });
+        mSpinnerAPN.setSelection(Preferences.getMmsType(mContext));
+        mSpinnerAPN.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                Spinner spinner = (Spinner) parent;
+                int val = (int)spinner.getSelectedItemPosition();
+                Preferences.setMmsType(mContext, val);
+            }
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+/*
         int type = Preferences.getMmsType(mContext);
         switch (type) {
         case Request.APN_PROFILE_SMILE:
@@ -97,6 +106,7 @@ public class MMSReq extends Activity {
             mTextAPN.setText(getString(R.string.invalid_apn_setting));
             b.setEnabled(false);
         }
+*/
     }
 
     // Background Task class

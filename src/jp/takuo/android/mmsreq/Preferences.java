@@ -18,22 +18,23 @@ package jp.takuo.android.mmsreq;
 import java.util.Date;
 
 import android.content.Context;
-import android.content.ContentResolver;
+// import android.content.ContentResolver;
 import android.preference.PreferenceManager;
-
+/*
 import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
 import android.net.Uri;
-
+*/
 public class Preferences {
     private static final String PREFS_AUTO_REQUEST  = "auto_request";
     private static final String PREFS_AUTO_EXIT = "auto_exit";
     private static final String PREFS_ENABLE_TOAST = "enable_toast";
+    private static final String PREFS_MMS_TYPE  = "mms_type";
 
     private static final String PREFS_SAVED_STATUS = "saved_status";
     private static final String PREFS_SAVED_DISCONNECTED_AT = "disconnected_at";
-
+/*
     private static final String APN_TYPE_MMS = "mms";
     private static final String APN_TYPE_ALL = "*";
 
@@ -102,9 +103,12 @@ public class Preferences {
         }
         return -1;
     }
+*/
 
     static public int getMmsType(Context context) {
-        return getMmsTypeInternal(context);
+        return PreferenceManager
+        .getDefaultSharedPreferences(context)
+        .getInt(PREFS_MMS_TYPE, 0);
     }
 
     static public boolean getAutoRequest(Context context) {
@@ -161,6 +165,11 @@ public class Preferences {
     static public void setSavedDisconnectedAt(Context context, long value) {
         PreferenceManager.getDefaultSharedPreferences(context)
         .edit().putLong(PREFS_SAVED_DISCONNECTED_AT, value).commit();
+    }
+
+    static public void setMmsType(Context context, int value) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+        .edit().putInt(PREFS_MMS_TYPE, value).commit();
     }
 
 }

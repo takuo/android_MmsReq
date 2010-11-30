@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 <string-array name="mms_type">
-  <item>smilemms</item>
-  <item>sbmms</item>
-  <item>mmsopen</item>
+  <item>smileweb (smile.world)</item>
+  <item>sbwapproxy (mailwebservice)</item>
+  <item>webopen (open)</item>
 </string-array>
+
 </resources>
