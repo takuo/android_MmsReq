@@ -44,6 +44,7 @@ public class Request {
     public static final int APN_PROFILE_SMILE = 0;
     public static final int APN_PROFILE_SBMMS = 1;
     public static final int APN_PROFILE_OPEN  = 2;
+    public static final int APN_PROFILE_ANDRO = 3;
 
     // MMS Proxy server
     private static final String SMILE_PROXY = "smileweb.softbank.ne.jp";
