@@ -4,6 +4,7 @@
         <item>smileweb (smile.world)</item>
         <item>sbwapproxy (mailwebservice)</item>
         <item>webopen (open)</item>
+        <item>pband (andglobal)</item>
     </string-array>
 
     <string-array name="notification_type">

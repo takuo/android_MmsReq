@@ -49,11 +49,13 @@ public class Request {
     private static final String SMILE_PROXY = "smileweb.softbank.ne.jp";
     private static final String VFJP_PROXY  = "sbwapproxy.softbank.ne.jp";
     private static final String OPEN_PROXY  = "webopen.softbank.ne.jp";
+    private static final String ANDRO_PROXY = "pband.softbank.ne.jp";
 
     // User Agent Strings
     private static final String SMILE_USER_AGENT = "smailhelp";
     private static final String VFJP_USER_AGENT  = "SoftBank/1.0/708SC/SCJ001 Browser/NetFront/3.3 Profile/MIDP-2.0 Configuration/CLDC-1.1";
     private static final String OPEN_USER_AGENT  = "Mozilla/5.0 (SymbianOS/9.2; U; Series60/3.1 NokiaN95/21.0.201 Profile/MIDP-2.0 Configuration/CLDC-1.1) AppleWebKit/413 (KHTML, like Gecko) Safari/413 Nokia/X02NK";
+    private static final String ANDRO_USER_AGENT = "Mozilla/5.0 (Linux; U; Android 2.1-update1; ja-jp; HTCX06HT Build/ERE27) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17";
 
     private static final int APN_ALREADY_ACTIVE     = 0;
     private static final int APN_REQUEST_STARTED    = 1;
@@ -81,6 +83,10 @@ public class Request {
         case APN_PROFILE_OPEN: // openmms
             mProxyHost = OPEN_PROXY;
             mUserAgent = OPEN_USER_AGENT;
+            break;
+        case APN_PROFILE_ANDRO: // andglobal
+            mProxyHost = ANDRO_PROXY;
+            mUserAgent = ANDRO_USER_AGENT;
             break;
         default:
             mProxyHost = null;
